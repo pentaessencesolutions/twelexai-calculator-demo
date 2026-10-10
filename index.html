@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TwelexAI Calculator Demo</title>
+
+  <style>
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      background: #111827;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+
+    .calculator {
+      width: 280px;
+      padding: 20px;
+      border-radius: 16px;
+      background: #1f2937;
+      box-shadow: 0 20px 40px rgb(0 0 0 / 35%);
+    }
+
+    #display {
+      box-sizing: border-box;
+      width: 100%;
+      margin-bottom: 15px;
+      padding: 15px;
+      border: 0;
+      border-radius: 10px;
+      background: #030712;
+      color: white;
+      font-size: 28px;
+      text-align: right;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    button {
+      padding: 15px;
+      border: 0;
+      border-radius: 10px;
+      background: #374151;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #4b5563;
+    }
+
+    .operator {
+      background: #2563eb;
+    }
+
+    .clear {
+      background: #dc2626;
+    }
+
+    .equals {
+      grid-column: span 2;
+      background: #16a34a;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="calculator">
+    <h1>Calculator</h1>
+
+    <input
+      id="display"
+      value="0"
+      readonly
+      aria-label="Calculator display"
+    >
+
+    <div class="buttons">
+      <button class="clear" data-action="clear">C</button>
+      <button data-action="backspace">⌫</button>
+      <button class="operator" data-value="/">÷</button>
+      <button class="operator" data-value="*">×</button>
+
+      <button data-value="7">7</button>
+      <button data-value="8">8</button>
+      <button data-value="9">9</button>
+      <button class="operator" data-value="-">−</button>
+
+      <button data-value="4">4</button>
+      <button data-value="5">5</button>
+      <button data-value="6">6</button>
+      <button class="operator" data-value="+">+</button>
+
+      <button data-value="1">1</button>
+      <button data-value="2">2</button>
+      <button data-value="3">3</button>
+      <button data-value=".">.</button>
+
+      <button data-value="0">0</button>
+      <button class="equals" data-action="calculate">=</button>
+    </div>
+  </main>
+
+  <script>
+    const display = document.querySelector("#display");
+    const buttons = document.querySelector(".buttons");
+
+    let expression = "";
+
+    function updateDisplay(value) {
+      display.value = value || "0";
+    }
+
+    function calculate() {
+      if (!expression) {
+        return;
+      }
+
+      try {
+        if (!/^[0-9+\-*/. ()]+$/.test(expression)) {
+          throw new Error("Invalid expression");
+        }
+
+        const result = Function(
+          `"use strict"; return (${expression})`
+        )();
+
+        if (!Number.isFinite(result)) {
+          throw new Error("Invalid calculation");
+        }
+
+        expression = String(result);
+        updateDisplay(expression);
+      } catch {
+        expression = "";
+        updateDisplay("Error");
+      }
+    }
+
+    buttons.addEventListener("click", (event) => {
+      const button = event.target.closest("button");
+
+      if (!button) {
+        return;
+      }
+
+      if (button.dataset.action === "clear") {
+        expression = "";
+        updateDisplay(expression);
+        return;
+      }
+
+      if (button.dataset.action === "backspace") {
+        expression = expression.slice(0, -1);
+        updateDisplay(expression);
+        return;
+      }
+
+      if (button.dataset.action === "calculate") {
+        calculate();
+        return;
+      }
+
+      expression += button.dataset.value;
+      updateDisplay(expression);
+    });
+  </script>
+</body>
+</html>
